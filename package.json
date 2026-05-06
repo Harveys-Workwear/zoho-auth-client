@@ -2,6 +2,16 @@
   "name": "@harveys-software/zoho-auth-client",
   "version": "0.1.0",
   "description": "Zoho OAuth client.",
+  "author": "Harveys of Oldham Limited",
+  "homepage": "https://github.com/Harveys-Workwear/zoho-auth-client#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Harveys-Workwear/zoho-auth-client.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Harveys-Workwear/zoho-auth-client/issues",
+    "email": "michael.holland@harveys.co.uk"
+  },
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -12,6 +22,9 @@
       "import": "./dist/index.mjs"
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist",
     "README.md"
@@ -20,8 +33,12 @@
     "build": "tsup",
     "test": "jest"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "zoho",
+    "oauth",
+    "client",
+    "authentication"
+  ],
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {

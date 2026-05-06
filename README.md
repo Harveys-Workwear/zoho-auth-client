@@ -12,7 +12,7 @@ It currently supports:
 ## Install
 
 ```bash
-npm install
+npm install @harveys-software/zoho-auth-client
 ```
 
 ## Build
