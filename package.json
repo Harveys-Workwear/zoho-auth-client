@@ -1,6 +1,6 @@
 {
   "name": "@harveys-software/zoho-auth-client",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Zoho OAuth client.",
   "author": "Harveys of Oldham Limited",
   "homepage": "https://github.com/Harveys-Workwear/zoho-auth-client#readme",
