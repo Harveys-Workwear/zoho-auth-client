@@ -238,6 +238,12 @@ class ZohoAuthClient {
     }
 
     if (data && this.isErrorResponse(data)) {
+      if (
+        data.error === "slow_down" ||
+        data.error === "authorization_pending"
+      ) {
+        return data;
+      }
       const zohoErrorCode = this.mapZohoErrorCode(data.error);
       throw new ZohoAuthError(
         response.statusText || "Device initiation request failed",
