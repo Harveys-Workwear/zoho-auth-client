@@ -18,7 +18,7 @@ const baseConfig = {
 
 describe("ZohoAuthClient serverApp", () => {
   beforeEach(() => {
-    global.fetch = jest.fn();
+    globalThis.fetch = jest.fn() as typeof fetch;
   });
 
   afterEach(() => {
@@ -49,7 +49,7 @@ describe("ZohoAuthClient serverApp", () => {
   });
 
   it("exchanges an authorization code for a token", async () => {
-    jest.mocked(global.fetch).mockResolvedValue(createJsonResponse(tokenSuccess));
+    jest.mocked(globalThis.fetch).mockResolvedValue(createJsonResponse(tokenSuccess));
 
     const client = new ZohoAuthClient(baseConfig);
 
@@ -57,11 +57,11 @@ describe("ZohoAuthClient serverApp", () => {
       client.serverApp.getAccessToken("auth-code", "https://example.com/callback"),
     ).resolves.toMatchObject(tokenSuccess);
 
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
   });
 
   it("refreshes an access token", async () => {
-    jest.mocked(global.fetch).mockResolvedValue(
+    jest.mocked(globalThis.fetch).mockResolvedValue(
       createJsonResponse(refreshTokenSuccess),
     );
 
@@ -73,7 +73,7 @@ describe("ZohoAuthClient serverApp", () => {
   });
 
   it("maps JSON error responses to ZohoAuthErrorCode", async () => {
-    jest.mocked(global.fetch).mockResolvedValue(
+    jest.mocked(globalThis.fetch).mockResolvedValue(
       createJsonResponse(
         { error: "invalid_client" },
         { status: 400, statusText: "Bad Request" },
@@ -94,7 +94,7 @@ describe("ZohoAuthClient serverApp", () => {
   });
 
   it("falls back to BAD_REQUEST for non-JSON error bodies", async () => {
-    jest.mocked(global.fetch).mockResolvedValue(
+    jest.mocked(globalThis.fetch).mockResolvedValue(
       createTextResponse("Internal Server Error", {
         status: 500,
         statusText: "Internal Server Error",

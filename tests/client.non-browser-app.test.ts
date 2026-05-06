@@ -18,7 +18,7 @@ const baseConfig = {
 
 describe("ZohoAuthClient nonBrowserApp", () => {
   beforeEach(() => {
-    global.fetch = jest.fn();
+    globalThis.fetch = jest.fn() as typeof fetch;
   });
 
   afterEach(() => {
@@ -27,7 +27,7 @@ describe("ZohoAuthClient nonBrowserApp", () => {
   });
 
   it("returns device initiation payloads", async () => {
-    jest.mocked(global.fetch).mockResolvedValue(
+    jest.mocked(globalThis.fetch).mockResolvedValue(
       createJsonResponse(deviceInitiationSuccess),
     );
 
@@ -39,7 +39,7 @@ describe("ZohoAuthClient nonBrowserApp", () => {
   });
 
   it("returns a token when polling succeeds immediately", async () => {
-    jest.mocked(global.fetch).mockResolvedValue(createJsonResponse(tokenSuccess));
+    jest.mocked(globalThis.fetch).mockResolvedValue(createJsonResponse(tokenSuccess));
 
     const client = new ZohoAuthClient(baseConfig);
 
@@ -50,9 +50,9 @@ describe("ZohoAuthClient nonBrowserApp", () => {
 
   it("retries while authorization is pending", async () => {
     jest.useFakeTimers();
-    jest.mocked(global.fetch)
+    jest.mocked(globalThis.fetch)
       .mockResolvedValueOnce(
-        createJsonResponse({ authorization_pending: true }),
+        createJsonResponse({ error: "authorization_pending" }),
       )
       .mockResolvedValueOnce(createJsonResponse(tokenSuccess));
 
@@ -63,17 +63,17 @@ describe("ZohoAuthClient nonBrowserApp", () => {
     await jest.advanceTimersByTimeAsync(10);
 
     await expect(pollingPromise).resolves.toMatchObject(tokenSuccess);
-    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
   });
 
   it("throws when polling retries are exhausted", async () => {
     jest.useFakeTimers();
-    jest.mocked(global.fetch)
+    jest.mocked(globalThis.fetch)
       .mockResolvedValueOnce(
-        createJsonResponse({ authorization_pending: true }),
+        createJsonResponse({ error: "authorization_pending" }),
       )
       .mockResolvedValueOnce(
-        createJsonResponse({ authorization_pending: true }),
+        createJsonResponse({ error: "authorization_pending" }),
       );
 
     const client = new ZohoAuthClient(baseConfig, 1, 10);
@@ -89,8 +89,8 @@ describe("ZohoAuthClient nonBrowserApp", () => {
   });
 
   it("throws terminal polling feedback errors", async () => {
-    jest.mocked(global.fetch).mockResolvedValue(
-      createJsonResponse({ access_denied: true }),
+    jest.mocked(globalThis.fetch).mockResolvedValue(
+      createJsonResponse({ error: "access_denied" }),
     );
 
     const client = new ZohoAuthClient(baseConfig);
