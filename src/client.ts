@@ -171,7 +171,7 @@ class ZohoAuthClient {
       return data as ZohoTokenResponse;
     }
 
-    if (this.isPollingFeedbackResponse(data)) {
+    if (this.isErrorResponse(data) && this.isPollingFeedbackCode(data)) {
       await this.handlePollingFeedback(data);
       if (retryCount < this.maxPollingRetries) {
         return this.devicePollingRequest(code, retryCount + 1);
@@ -191,33 +191,33 @@ class ZohoAuthClient {
   }
 
   private async handlePollingFeedback(
-    feedback: ZohoPollingFeedbackResponse,
+    response: ZohoErrorResponse,
   ): Promise<void> {
-    if (feedback.slow_down) {
+    if (response.error === ZohoPollingFeedbackCode.SLOW_DOWN) {
       await new Promise((resolve) => setTimeout(resolve, this.pollingInterval));
       return;
     }
 
-    if (feedback.authorization_pending) {
+    if (response.error === ZohoPollingFeedbackCode.AUTHORIZATION_PENDING) {
       await new Promise((resolve) => setTimeout(resolve, this.pollingInterval));
       return;
     }
 
-    if (feedback.other_dc) {
+    if (response.error === ZohoPollingFeedbackCode.OTHER_DC) {
       throw new ZohoAuthError(
         "User is trying to authenticate from a different data center",
         ZohoAuthErrorCode.OTHER_DC,
       );
     }
 
-    if (feedback.access_denied) {
+    if (response.error === ZohoPollingFeedbackCode.ACCESS_DENIED) {
       throw new ZohoAuthError(
         "User denied access",
         ZohoAuthErrorCode.ACCESS_DENIED,
       );
     }
 
-    if (feedback.expired) {
+    if (response.error === ZohoPollingFeedbackCode.EXPIRED) {
       throw new ZohoAuthError("Device code expired", ZohoAuthErrorCode.EXPIRED);
     }
 
@@ -238,11 +238,8 @@ class ZohoAuthClient {
     }
 
     if (data && this.isErrorResponse(data)) {
-      if (
-        data.error === "slow_down" ||
-        data.error === "authorization_pending"
-      ) {
-        return data;
+      if (this.isPollingFeedbackCode(data)) {
+        return data as ZohoErrorResponse;
       }
       const zohoErrorCode = this.mapZohoErrorCode(data.error);
       throw new ZohoAuthError(
@@ -271,15 +268,9 @@ class ZohoAuthClient {
     return data;
   }
 
-  private isPollingFeedbackResponse(
-    data: any,
-  ): data is ZohoPollingFeedbackResponse {
-    return (
-      "slow_down" in data ||
-      "authorization_pending" in data ||
-      "other_dc" in data ||
-      "access_denied" in data ||
-      "expired" in data
+  private isPollingFeedbackCode(data: ZohoErrorResponse): boolean {
+    return Object.values(ZohoPollingFeedbackCode).includes(
+      data.error as ZohoPollingFeedbackCode,
     );
   }
 
@@ -336,12 +327,12 @@ interface ZohoInitiationResponse {
   interval: number;
 }
 
-interface ZohoPollingFeedbackResponse {
-  slow_down?: boolean;
-  authorization_pending?: boolean;
-  other_dc?: boolean;
-  access_denied?: boolean;
-  expired?: boolean;
+enum ZohoPollingFeedbackCode {
+  SLOW_DOWN = "slow_down",
+  AUTHORIZATION_PENDING = "authorization_pending",
+  OTHER_DC = "other_dc",
+  ACCESS_DENIED = "access_denied",
+  EXPIRED = "expired",
 }
 
 interface ZohoTokenResponse {
